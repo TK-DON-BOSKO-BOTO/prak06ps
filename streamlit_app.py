@@ -1,3 +1,7 @@
+# Pastikan semua pustaka yang diperlukan diinstal
+# Jika Anda menjalankan ini secara lokal, gunakan terminal untuk menginstal pustaka berikut:
+# pip install streamlit pandas numpy scikit-learn matplotlib seaborn
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,7 +9,7 @@ from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder, StandardScaler
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
     ConfusionMatrixDisplay,
     RocCurveDisplay,
@@ -13,10 +17,9 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
-    roc_auc_score,
-    confusion_matrix,
     roc_curve,
-    precision_recall_curve
+    precision_recall_curve,
+    confusion_matrix,
 )
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -24,7 +27,11 @@ import seaborn as sns
 
 # Fungsi untuk memuat data
 def load_data():
-    data = pd.read_csv('spam.csv')
+    try:
+        data = pd.read_csv('spam.csv')
+    except FileNotFoundError:
+        st.error("Dataset tidak ditemukan. Pastikan file 'spam.csv' tersedia di direktori.")
+        return None
     label = LabelEncoder()
     for col in data.columns:
         data[col] = label.fit_transform(data[col])
@@ -33,7 +40,7 @@ def load_data():
 
 # Fungsi untuk membagi data
 def split(df):
-    y = df['yesno']
+    y = df['yesno']  # Ganti sesuai kolom target Anda
     x = df.drop(columns=['yesno'])
     scaler = StandardScaler()
     x_scaled = scaler.fit_transform(x)
@@ -83,6 +90,9 @@ def main():
 
     # Muat data
     df = load_data()
+    if df is None:
+        return  # Hentikan jika data tidak dimuat
+
     class_names = ['Not Spam', 'Spam']
     x_train, x_test, y_train, y_test = split(df)
 
